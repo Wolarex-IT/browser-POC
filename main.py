@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 
 from cloakbrowser import launch_async
-from fastapi import FastAPI, Request
+from fastapi import Body, FastAPI, Request
 from pydantic import HttpUrl
 
 
@@ -17,7 +17,10 @@ app = FastAPI(lifespan=lifespan)
 
 
 @app.post("/")
-async def parse_url(url: HttpUrl, request: Request):
+async def parse_url(
+    request: Request,
+    url: HttpUrl = Body(),
+) -> str:
     browser = request.app.state.browser
 
     page = await browser.new_page()
