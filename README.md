@@ -22,3 +22,12 @@ curl -X POST "http://127.0.0.1:8000/" \
 
 - `POST /` - Parse a URL (passed as a raw JSON string in the request body) and return its rendered HTML
 (as a plain text string).
+
+## Progress
+
+Milestones, the achievement of which will help us better understand how to work with a browser:
+
+- [x] Build a FastAPI app to use the CloakBrowser locally
+- [x] Create a separate container with CloakBrowser and use it via the Playwright API over CDP
+- [ ] Create a container with CloakBrowser dynamically using the Docker SDK
+([DooD](https://www.google.com/search?q=Docker+outside+of+Docker))
