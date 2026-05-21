@@ -5,17 +5,12 @@ website URL and return its rendered HTML using [CloakBrowser](https://github.com
 
 ## Usage
 
-1. Install the dependencies (recommended to use a virtual environment).
+1. Build & Run FastAPI application and CloakBrowser using Docker Compose.
 ```bash
-pip install -r requirements.txt
+docker compose up -d
 ```
 
-2. Run the server in development mode.
-```bash
-fastapi dev main.py
-```
-
-3. Test on `http://127.0.0.1:8000/docs` or via curl.
+2. Test on `http://127.0.0.1:8000/docs` or via curl.
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/" \

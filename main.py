@@ -1,31 +1,46 @@
 from contextlib import asynccontextmanager
+from os import environ
 
-from cloakbrowser import launch_async
-from fastapi import Body, FastAPI, Request
+from fastapi import Body, FastAPI, Request, HTTPException, Depends
 from pydantic import HttpUrl
+from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError, Browser
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    browser = await launch_async()
-    app.state.browser = browser
+async def lifespan(fastapi_app: FastAPI):
+    playwright_driver = await async_playwright().start()
+    fastapi_app.state.playwright_driver = playwright_driver
+
+    BROWSER_URL = environ.get("BROWSER_URL", "http://127.0.0.1:9222")
+    browser = await playwright_driver.chromium.connect_over_cdp(BROWSER_URL)
+    fastapi_app.state.browser = browser
+
     yield
+
     await browser.close()
+    await playwright_driver.stop()
 
 
 app = FastAPI(lifespan=lifespan)
 
 
+def get_browser(request: Request) -> Browser:
+    return request.app.state.browser
+
+
 @app.post("/")
 async def parse_url(
-    request: Request,
     url: HttpUrl = Body(),
+    browser: Browser = Depends(get_browser)
 ) -> str:
-    browser = request.app.state.browser
+    context = await browser.new_context()
+    page = await context.new_page()
 
-    page = await browser.new_page()
-    await page.goto(str(url))
-    html = await page.content()
-    await page.close()
-
-    return html
+    try:
+        await page.goto(str(url), timeout=15000)
+        html = await page.content()
+        return html
+    except PlaywrightTimeoutError:
+        raise HTTPException(status_code=504, detail="Website timeout")
+    finally:
+        await context.close()
