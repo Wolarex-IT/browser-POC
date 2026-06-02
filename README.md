@@ -29,5 +29,5 @@ Milestones, the achievement of which will help us better understand how to work 
 
 - [x] Build a FastAPI app to use the CloakBrowser locally
 - [x] Create a separate container with CloakBrowser and use it via the Playwright API over CDP
-- [ ] Create a container with CloakBrowser dynamically using the Docker SDK
+- [x] Create a container with CloakBrowser dynamically using the Docker SDK
 ([DooD](https://www.google.com/search?q=Docker+outside+of+Docker))

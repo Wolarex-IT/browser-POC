@@ -1,39 +1,19 @@
 name: browser-poc
 
-x-config:
-  app_ports: &app_ports "8000:8000"
-  browser_url: &browser_url "BROWSER_URL=http://browser:9222"
-
 services:
-  browser:
-    image: cloakhq/cloakbrowser:latest
-    container_name: cloak_browser
-    command: cloakserve
-#    shm_size: 2gb  # use for production (default is 64mb, not enough for chromium)
-    security_opt:
-      - seccomp=unconfined  # to enable chromium sandbox
-    volumes:
-      - cloak_browser_bin:/root/.cloakbrowser
-    healthcheck:
-      test: [
-        "CMD-SHELL",
-        "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:9222/json/version')\" || exit 1"
-      ]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 35s
-    restart: unless-stopped
-
   app:
     build: .
     ports:
-      - *app_ports
+      - "8000:8000"
     environment:
-      - *browser_url
-    depends_on:
-      browser:
-        condition: service_healthy
+      - BROWSER_NETWORK=cloak_net
+    group_add:
+      - "${DOCKER_GID:-999}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - cloak_net
 
-volumes:
-  cloak_browser_bin:
+networks:
+  cloak_net:
+    name: cloak_net
